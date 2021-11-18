@@ -52,6 +52,7 @@ import {
 import { defineComponent } from 'vue';
 import {informationCircleOutline} from 'ionicons/icons';
 
+const INITIAL_TIME= 5
 export default defineComponent({
   name: 'Home',
   components: {
@@ -67,11 +68,28 @@ export default defineComponent({
     IonRow,
     IonCol
   },
-  setup(){
+  setup() {
+    return {
+      infoIcon: informationCircleOutline,
+      started: false,
+      counterInterval: null
+    }
+  },
+  data(){
     return{
-      infoIcon:informationCircleOutline,
       score: 0,
-      timeLeft: 60
+      timeLeft: INITIAL_TIME
+    }
+  },
+  watch: {
+    timeLeft: function(newTimeLeft){
+      if(newTimeLeft <=0){
+       this.started =false
+        this.timeLeft=INITIAL_TIME
+        clearInterval(this.counterInterval)
+       this.showResult()
+        this.score = 0
+      }
     }
   },
   methods:{
@@ -85,18 +103,24 @@ export default defineComponent({
             });
         await alert.present();
     },
-    async tap(){
-      console.log('TODO TAP ME');
+    tap(){
+      this.score++;
+      if(!this.started){
+       this.counterInterval = setInterval(()=>{
+          this.timeLeft--
+        },1000)
+        this.started=true
+      }
+    },
+    async showResult(){
 
-      //TOAST
-
+      //Toast
       const toast = await toastController.create({
         color: 'dark',
         duration: 2000,
-        message: 'Paired successfully',
+        message: `Time's Up. Your Score was ${this.score}`,
         showCloseButton: true
       });
-
       await toast.present();
     }
   }
